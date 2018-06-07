@@ -87,23 +87,56 @@ public class DistanceMeasureManager : MonoBehaviour
 
     private void CreateMeasurementLabel()
     {
-        GameObject labelObject = new GameObject("MeasureLabel");
         Vector3 labelPosition = Vector3.Lerp(firstTouchPosition, secondTouchPosition, 0.5f);
-        labelObject.transform.position = labelPosition;
-        Canvas labelCanvas = labelObject.AddComponent<Canvas>();
-        labelCanvas.renderMode = RenderMode.WorldSpace;        
+        Quaternion labelRotation = Quaternion.FromToRotation(Vector3.right, secondTouchPosition - firstTouchPosition);
+        GameObject labelObject = NewLabelCanvas(labelPosition, labelRotation);
+        GameObject textObject = NewLabel(labelPosition, labelRotation, labelObject);
+        TextMeshProUGUI labelText = NewLabelText(textObject);
 
+        string distanceToDisplay = measurements[measurements.Count - 1].Distance.ToString();
+        distanceToDisplay = distanceToDisplay.Substring(0, 5);
+        labelText.text = distanceToDisplay;
+        
+    }
+
+    private static TextMeshProUGUI NewLabelText(GameObject label)
+    {
+        TextMeshProUGUI labelText = label.AddComponent<TextMeshProUGUI>();
+        labelText.fontSize = 1;
+
+        RectTransform textRt = labelText.GetComponent<RectTransform>();
+        SetPositionParameters(textRt);
+        return labelText;
+    }
+
+    private static void SetPositionParameters(RectTransform textRt)
+    {
+        textRt.anchorMin = Vector2.zero;
+        textRt.anchorMax = Vector2.one;
+        textRt.pivot = Vector2.one * 0.5f;
+        textRt.offsetMax = Vector2.zero;
+        textRt.offsetMin = Vector2.zero;
+    }
+
+    private static GameObject NewLabel(Vector3 labelPosition, Quaternion labelRotation, GameObject parentCanvas)
+    {
         GameObject textObject = new GameObject("TextLabel");
-        textObject.transform.parent = labelObject.transform;
+        textObject.transform.parent = parentCanvas.transform;
         textObject.transform.position = labelPosition;
-        RectTransform rt = labelObject.GetComponent<RectTransform>();
+        textObject.transform.rotation = labelRotation;
+        return textObject;
+    }
+
+    private static GameObject NewLabelCanvas(Vector3 labelPosition, Quaternion labelRotation)
+    {
+        GameObject canvasLabel = new GameObject("MeasureLabel");
+        canvasLabel.transform.position = labelPosition;
+        canvasLabel.transform.rotation = labelRotation;
+        RectTransform rt = canvasLabel.GetComponent<RectTransform>();
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 3);
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 3);
-        TextMeshProUGUI labelText = textObject.AddComponent<TextMeshProUGUI>();
-        RectTransform textRt = labelText.GetComponent<RectTransform>();
-        textRt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 6);
-        textRt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 3);
-        labelText.text = measurements[measurements.Count - 1].Distance.ToString();
-        labelText.fontSize = 1;
+        Canvas labelCanvas = canvasLabel.AddComponent<Canvas>();
+        labelCanvas.renderMode = RenderMode.WorldSpace;
+        return canvasLabel;
     }
 }
