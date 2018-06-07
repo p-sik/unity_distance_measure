@@ -1,6 +1,7 @@
 ﻿using Assets.DistanceMeasure;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,9 +9,9 @@ public class DistanceMeasureManager : MonoBehaviour
 {
     public Text distance;
 
-    int numLines = 1;
-    bool awaitingFirstInput = true;
-    bool awaitingSecondInput = false;
+    int numLines;
+    bool isFirstInputInvalid = true;
+    bool isSecondInputInvalid = false;
     Vector3 firstTouchPosition;
     Vector3 secondTouchPosition;
 
@@ -20,26 +21,27 @@ public class DistanceMeasureManager : MonoBehaviour
 
     private void Update()
     {
-        if (awaitingFirstInput && Input.GetMouseButtonUp(0))
+        if (isFirstInputInvalid && Input.GetMouseButtonUp(0))
         {
-            firstTouchPosition = PerformRaycast(Input.mousePosition);
-            awaitingFirstInput = firstTouchPosition == Vector3.zero;
-            awaitingSecondInput = !awaitingFirstInput;
+            firstTouchPosition = GetRaycastHitPosition(Input.mousePosition);
+            isFirstInputInvalid = firstTouchPosition == Vector3.zero;
+            isSecondInputInvalid = !isFirstInputInvalid;
         }
-        else if (awaitingSecondInput && Input.GetMouseButtonUp(0))
+        else if (isSecondInputInvalid && Input.GetMouseButtonUp(0))
         {
-            secondTouchPosition = PerformRaycast(Input.mousePosition);
-            awaitingSecondInput = secondTouchPosition == Vector3.zero;
+            secondTouchPosition = GetRaycastHitPosition(Input.mousePosition);
+            isSecondInputInvalid = secondTouchPosition == Vector3.zero;
         }
-        else if (!awaitingFirstInput && !awaitingSecondInput)
+        else if (!isFirstInputInvalid && !isSecondInputInvalid)
         {
             CreateLineRenderer();
-            awaitingFirstInput = true;
-            awaitingSecondInput = false;
+            CreateMeasurementLabel();
+            isFirstInputInvalid = true;
+            isSecondInputInvalid = false;
         }
     }
 
-    private Vector3 PerformRaycast(Vector3 screenPosition)
+    private Vector3 GetRaycastHitPosition(Vector3 screenPosition)
     {
         Ray rayFromDetected = Camera.main.ScreenPointToRay(screenPosition);
         RaycastHit rayHit;
@@ -55,20 +57,53 @@ public class DistanceMeasureManager : MonoBehaviour
 
     private void CreateLineRenderer()
     {
-        GameObject go = new GameObject();
-        go.transform.parent = gameObject.transform;
-        go.name = $"Measurement_{numLines++}";
-        lineRendererContainers.Add(go);
-        LineRenderer lr = go.AddComponent<LineRenderer>();
+        GameObject container = CreateContainer();
+        SetLinerenderer(container);
+        float measuredDistance = Vector3.Distance(firstTouchPosition, secondTouchPosition);
+        distance.text = measuredDistance.ToString();
+        Measurement createdMeasure = new Measurement(measuredDistance, container.name);
+        measurements.Add(createdMeasure);
+    }
+
+    private GameObject CreateContainer()
+    {
+        GameObject container = new GameObject();
+        container.transform.parent = gameObject.transform;
+        container.name = $"Measurement_{++numLines}";
+        lineRendererContainers.Add(container);
+        return container;
+    }
+
+    private void SetLinerenderer(GameObject containerObject)
+    {
+        LineRenderer lr = containerObject.AddComponent<LineRenderer>();
         lr.enabled = true;
         lr.positionCount = 2;
         lr.startWidth = 0.2f;
         lr.endWidth = lr.startWidth;
         Vector3[] positions = { firstTouchPosition, secondTouchPosition };
         lr.SetPositions(positions);
-        float distance = Vector3.Distance(firstTouchPosition, secondTouchPosition);
-        this.distance.text = distance.ToString();
-        Measurement createdMeasure = new Measurement(distance, go.name);
-        measurements.Add(createdMeasure);
+    }
+
+    private void CreateMeasurementLabel()
+    {
+        GameObject labelObject = new GameObject("MeasureLabel");
+        Vector3 labelPosition = Vector3.Lerp(firstTouchPosition, secondTouchPosition, 0.5f);
+        labelObject.transform.position = labelPosition;
+        Canvas labelCanvas = labelObject.AddComponent<Canvas>();
+        labelCanvas.renderMode = RenderMode.WorldSpace;        
+
+        GameObject textObject = new GameObject("TextLabel");
+        textObject.transform.parent = labelObject.transform;
+        textObject.transform.position = labelPosition;
+        RectTransform rt = labelObject.GetComponent<RectTransform>();
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 3);
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 3);
+        TextMeshProUGUI labelText = textObject.AddComponent<TextMeshProUGUI>();
+        RectTransform textRt = labelText.GetComponent<RectTransform>();
+        textRt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 6);
+        textRt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 3);
+        labelText.text = measurements[measurements.Count - 1].Distance.ToString();
+        labelText.fontSize = 1;
     }
 }
