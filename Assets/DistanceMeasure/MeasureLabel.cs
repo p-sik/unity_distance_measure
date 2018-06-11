@@ -14,6 +14,9 @@ namespace Assets.DistanceMeasure
         Vector3 firstPosition, secondPosition;
         List<Measurement> Measurements = OnScreenMeasurement.Measurements;
 
+        public static List<GameObject> Canvases = new List<GameObject>();
+        public static List<GameObject> TextLabels = new List<GameObject>();
+
         public MeasureLabel(Vector3 beginPosition, Vector3 endPosition)
         {
             firstPosition = beginPosition;
@@ -23,10 +26,15 @@ namespace Assets.DistanceMeasure
         public void CreateMeasurementLabel()
         {
             Vector3 labelPosition = Vector3.Lerp(firstPosition, secondPosition, 0.5f);
-            Quaternion labelRotation = Quaternion.FromToRotation(Vector3.right, secondPosition - firstPosition);
-            GameObject labelObject = NewLabelCanvas(labelPosition, labelRotation);
-            GameObject textObject = NewLabel(labelPosition, labelRotation, labelObject);
+            //Quaternion labelRotation = Quaternion.FromToRotation(Vector3.right, secondPosition - firstPosition);
+            //Quaternion onlyVerticalRotation = Quaternion.Euler(0, labelRotation.eulerAngles.y, 0);
+            Quaternion onlyVerticalRotation = Quaternion.identity;
+            GameObject labelObject = NewLabelCanvas(labelPosition, onlyVerticalRotation);
+            GameObject textObject = NewLabel(labelPosition, onlyVerticalRotation, labelObject);
             TextMeshProUGUI labelText = NewLabelText(textObject);
+
+            Canvases.Add(labelObject);
+            TextLabels.Add(textObject);
 
             string distanceToDisplay = Measurements[Measurements.Count - 1].Distance.ToString();
             distanceToDisplay = distanceToDisplay.Substring(0, 5);
@@ -52,15 +60,6 @@ namespace Assets.DistanceMeasure
             textRt.offsetMin = Vector2.zero;
         }
 
-        private GameObject NewLabel(Vector3 labelPosition, Quaternion labelRotation, GameObject parentCanvas)
-        {
-            GameObject textObject = new GameObject("TextLabel");
-            textObject.transform.parent = parentCanvas.transform;
-            textObject.transform.position = labelPosition;
-            textObject.transform.rotation = labelRotation;
-            return textObject;
-        }
-
         private GameObject NewLabelCanvas(Vector3 labelPosition, Quaternion labelRotation)
         {
             GameObject canvasLabel = new GameObject($"MeasureLabel_{++numLines}");
@@ -72,6 +71,15 @@ namespace Assets.DistanceMeasure
             rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 3);
             rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 3);
             return canvasLabel;
+        }
+
+        private GameObject NewLabel(Vector3 labelPosition, Quaternion labelRotation, GameObject parentCanvas)
+        {
+            GameObject textObject = new GameObject("TextLabel");
+            textObject.transform.parent = parentCanvas.transform;
+            textObject.transform.position = labelPosition;
+            textObject.transform.rotation = labelRotation;
+            return textObject;
         }
     }
 }

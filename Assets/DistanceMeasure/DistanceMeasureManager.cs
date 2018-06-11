@@ -17,6 +17,7 @@ public class DistanceMeasureManager : MonoBehaviour
 
     private void Update()
     {
+
         if (isFirstInputInvalid && Input.GetMouseButtonUp(0))
         {
             firstTouchPosition = GetRaycastHitPosition(Input.mousePosition);
@@ -34,6 +35,17 @@ public class DistanceMeasureManager : MonoBehaviour
             measure.DisplayMeasureLabel();
             isFirstInputInvalid = true;
         }
+
+        MeasureLabel.Canvases.ForEach(x =>
+        {
+            x.transform.LookAt(Camera.main.transform, Vector3.up);
+            x.transform.Rotate(0, 180, 0);
+        });
+        MeasureLabel.TextLabels.ForEach(x =>
+        {
+            x.transform.LookAt(Camera.main.transform, Vector3.up);
+            x.transform.Rotate(0, 180, 0);
+        });
     }
 
     private Vector3 GetRaycastHitPosition(Vector3 screenPosition)
