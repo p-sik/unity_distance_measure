@@ -36,16 +36,8 @@ public class DistanceMeasureManager : MonoBehaviour
             isFirstInputInvalid = true;
         }
 
-        MeasureLabel.Canvases.ForEach(x =>
-        {
-            x.transform.LookAt(Camera.main.transform, Vector3.up);
-            x.transform.Rotate(0, 180, 0);
-        });
-        MeasureLabel.TextLabels.ForEach(x =>
-        {
-            x.transform.LookAt(Camera.main.transform, Vector3.up);
-            x.transform.Rotate(0, 180, 0);
-        });
+        MeasureLabel.Canvases.ForEach(canvas => RotateTowardsCamera(canvas));
+        MeasureLabel.TextLabels.ForEach(label => RotateTowardsCamera(label));
     }
 
     private Vector3 GetRaycastHitPosition(Vector3 screenPosition)
@@ -60,5 +52,11 @@ public class DistanceMeasureManager : MonoBehaviour
         {
             return Vector3.zero;
         }
+    }
+
+    private void RotateTowardsCamera(GameObject objectToRotate)
+    {
+        objectToRotate.transform.LookAt(Camera.main.transform);
+        objectToRotate.transform.Rotate(0, 180, 0);
     }
 }

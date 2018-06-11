@@ -26,11 +26,8 @@ namespace Assets.DistanceMeasure
         public void CreateMeasurementLabel()
         {
             Vector3 labelPosition = Vector3.Lerp(firstPosition, secondPosition, 0.5f);
-            //Quaternion labelRotation = Quaternion.FromToRotation(Vector3.right, secondPosition - firstPosition);
-            //Quaternion onlyVerticalRotation = Quaternion.Euler(0, labelRotation.eulerAngles.y, 0);
-            Quaternion onlyVerticalRotation = Quaternion.identity;
-            GameObject labelObject = NewLabelCanvas(labelPosition, onlyVerticalRotation);
-            GameObject textObject = NewLabel(labelPosition, onlyVerticalRotation, labelObject);
+            GameObject labelObject = NewLabelCanvas(labelPosition);
+            GameObject textObject = NewLabel(labelPosition, labelObject);
             TextMeshProUGUI labelText = NewLabelText(textObject);
 
             Canvases.Add(labelObject);
@@ -60,11 +57,10 @@ namespace Assets.DistanceMeasure
             textRt.offsetMin = Vector2.zero;
         }
 
-        private GameObject NewLabelCanvas(Vector3 labelPosition, Quaternion labelRotation)
+        private GameObject NewLabelCanvas(Vector3 labelPosition)
         {
             GameObject canvasLabel = new GameObject($"MeasureLabel_{++numLines}");
             canvasLabel.transform.position = labelPosition;
-            canvasLabel.transform.rotation = labelRotation;
             Canvas labelCanvas = canvasLabel.AddComponent<Canvas>();
             labelCanvas.renderMode = RenderMode.WorldSpace;
             RectTransform rt = canvasLabel.GetComponent<RectTransform>();
@@ -73,12 +69,11 @@ namespace Assets.DistanceMeasure
             return canvasLabel;
         }
 
-        private GameObject NewLabel(Vector3 labelPosition, Quaternion labelRotation, GameObject parentCanvas)
+        private GameObject NewLabel(Vector3 labelPosition, GameObject parentCanvas)
         {
             GameObject textObject = new GameObject("TextLabel");
             textObject.transform.parent = parentCanvas.transform;
             textObject.transform.position = labelPosition;
-            textObject.transform.rotation = labelRotation;
             return textObject;
         }
     }
