@@ -3,7 +3,6 @@
 Measuring the distance between two clicks and displaying it on a line renderer with text and labels
 
 ## TO DO
-- measure distance
-- display line renderer on clicks
-- display distance and label on line renderer
-- change to touch
+- change to touch if more functionality needed, otherwise it's okay to keep simulating mouse
+- add material to LineRenderer
+- change dimensions to work in real scale

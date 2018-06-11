@@ -15,9 +15,9 @@ public class DistanceMeasureManager : MonoBehaviour
     Vector3 firstTouchPosition;
     Vector3 secondTouchPosition;
 
+    //IMPROVE more data into a ScriptableObject?
     private void Update()
     {
-
         if (isFirstInputInvalid && Input.GetMouseButtonUp(0))
         {
             firstTouchPosition = GetRaycastHitPosition(Input.mousePosition);
